@@ -12,7 +12,7 @@ class ContentChunk(db.Model):
     chunk_index = db.Column(db.Integer)
     start_time = db.Column(db.Float)
     end_time = db.Column(db.Float)
-    metadata = db.Column(db.JSON)
+    related_metadata = db.Column(db.JSON)
     vector_id = db.Column(db.String(100))
     embedding_model = db.Column(db.String(100))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
