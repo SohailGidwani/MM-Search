@@ -9,13 +9,13 @@ search_bp = Blueprint('search', __name__)
 @search_bp.route('', methods=['POST'])
 def search():
     """Perform search."""
-    data = request.get_json(force=True)
-    query = data.get('query', '')
+    body = request.get_json(force=True)
+    query = body.get('query', '')
     if not query:
         return jsonify({'error': 'Query required'}), 400
     service = SearchService()
-    results = service.search(query)
-    return jsonify({'results': results})
+    result = service.search(query)
+    return jsonify(result)
 
 
 @search_bp.route('/suggestions', methods=['GET'])
