@@ -15,7 +15,7 @@ class OllamaClient:
 
     def embed_text(self, text: str) -> List[float]:
         """Generate text embedding."""
-        url = f"{self.base_url}/embed"
+        url = f"{self.base_url}/api/embed"
         try:
             resp = requests.post(url, json={"model": "nomic-embed-text", "prompt": text})
             resp.raise_for_status()
