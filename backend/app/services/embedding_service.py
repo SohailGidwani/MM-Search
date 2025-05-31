@@ -19,13 +19,23 @@ class EmbeddingService:
 
     def embed_text(self, text: str, metadata: dict) -> str:
         """Embed text and store in Qdrant."""
+        logger.debug("Embedding text: %s", text)
         vector = self.ollama.embed_text(text)
+        logger.debug("Generated embedding length: %d", len(vector))
         if not vector:
+            logger.warning("No embedding generated for text")
             return ''
         try:
             collection = 'text_embeddings'
-            response = self.qdrant.upload_collection(collection_name=collection, vectors=[vector], payload=[metadata])
-            return response[0]
+            logger.debug("Uploading embedding to Qdrant with metadata: %s", metadata)
+            response = self.qdrant.upload_collection(
+                collection_name=collection,
+                vectors=[vector],
+                payload=[metadata],
+            )
+            vector_id = response[0]
+            logger.debug("Uploaded vector id: %s", vector_id)
+            return vector_id
         except Exception as exc:  # pylint: disable=broad-except
-            logger.error("Embedding upload failed: %s", exc)
+            logger.exception("Embedding upload failed")
             return ''

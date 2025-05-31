@@ -25,13 +25,16 @@ class ProcessingService:
         if not file_record:
             logger.error("File %s not found", file_id)
             return
+        logger.info("Processing file %s", file_id)
         file_record.processing_status = 'processing'
         file_record.processing_started_at = db.func.now()
         db.session.commit()
 
         try:
             chunks = process_file(Path(file_record.file_path))
+            logger.debug("Extracted %d chunks from file", len(chunks))
             for idx, chunk in enumerate(chunks):
+                logger.debug("Chunk %d content: %s", idx, chunk.get('content'))
                 metadata = {
                     'file_id': file_id,
                     'chunk_id': idx,
@@ -39,6 +42,7 @@ class ProcessingService:
                     'filename': file_record.filename,
                 }
                 vector_id = self.embedding.embed_text(chunk['content'], metadata)
+                logger.debug("Vector id returned: %s", vector_id)
                 # store chunk in DB
                 from ..models import ContentChunk
                 db.session.add(ContentChunk(
@@ -52,7 +56,7 @@ class ProcessingService:
             file_record.processing_status = 'completed'
             file_record.processing_completed_at = db.func.now()
         except Exception as exc:  # pylint: disable=broad-except
-            logger.error("Processing failed: %s", exc)
+            logger.exception("Processing failed")
             file_record.processing_status = 'error'
             file_record.error_message = str(exc)
         db.session.commit()
