@@ -35,16 +35,18 @@ class SearchService:
                 results = [hit.payload for hit in search_result]
                 logger.debug("Qdrant returned %d results", len(results))
 
-                # gather text from DB for summarization
-                from ..models import ContentChunk
-                texts = []
-                for payload in results:
-                    file_id = payload.get('file_id')
-                    chunk_idx = payload.get('chunk_id')
-                    chunk = ContentChunk.query.filter_by(file_id=file_id, chunk_index=chunk_idx).first()
-                    if chunk and chunk.content_text:
-                        texts.append(chunk.content_text)
-                        logger.debug("Found chunk for summarization: %s", chunk.content_text)
+                texts = [p.get('content') for p in results if p.get('content')]
+
+                if not texts:
+                    # gather text from DB for summarization
+                    from ..models import ContentChunk
+                    for payload in results:
+                        file_id = payload.get('file_id')
+                        chunk_idx = payload.get('chunk_id')
+                        chunk = ContentChunk.query.filter_by(file_id=file_id, chunk_index=chunk_idx).first()
+                        if chunk and chunk.content_text:
+                            texts.append(chunk.content_text)
+                            logger.debug("Found chunk for summarization: %s", chunk.content_text)
                 if texts:
                     context = "\n".join(texts)
                     prompt = (
