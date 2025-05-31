@@ -35,3 +35,16 @@ class OllamaClient:
         except requests.RequestException as exc:
             logger.error("Ollama image description failed: %s", exc)
             return ""
+
+    def summarize_text(self, text: str) -> str:
+        """Summarize text using llama3.2:3b model."""
+        url = f"{self.base_url}/generate"
+        payload = {"model": "llama3.2:3b", "prompt": text}
+        try:
+            resp = requests.post(url, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            return data.get("response") or data.get("summary", "")
+        except requests.RequestException as exc:
+            logger.error("Ollama summarization failed: %s", exc)
+            return ""
