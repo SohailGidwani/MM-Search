@@ -17,6 +17,7 @@ class CacheService:
 
     def get(self, key: str) -> Any:
         """Get value from cache."""
+        logger.debug("Cache GET %s", key)
         value = self.redis.get(key)
         if value is None:
             return None
@@ -24,4 +25,5 @@ class CacheService:
 
     def set(self, key: str, value: Any, ttl: int = 3600) -> None:
         """Set cache value."""
+        logger.debug("Cache SET %s ttl=%s", key, ttl)
         self.redis.setex(key, ttl, json.dumps(value))

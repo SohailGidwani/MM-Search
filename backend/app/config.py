@@ -13,6 +13,8 @@ class Config:
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
     MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 100 * 1024 * 1024))
     HF_MODEL_CACHE = os.getenv('HF_MODEL_CACHE', 'hf_models_cache')
+    LOG_FILE = os.getenv('LOG_FILE', 'app.log')
+    LOG_LEVEL = os.getenv('LOG_LEVEL', 'DEBUG')
     SCHEDULER_API_ENABLED = True
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
 

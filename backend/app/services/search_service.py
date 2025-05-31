@@ -21,16 +21,19 @@ class SearchService:
 
     def search(self, query: str, limit: int = 5) -> Dict[str, object]:
         """Perform semantic search and summarize results."""
+        logger.info("Search requested for query: %s", query)
         vector = []
         results: List[dict] = []
         summary = ""
         try:
             vector = self.ollama.embed_text(query)
+            logger.debug("Query embedding length: %d", len(vector))
             if vector:
                 search_result = self.qdrant.search(
                     collection_name='text_embeddings', query_vector=vector, limit=limit
                 )
                 results = [hit.payload for hit in search_result]
+                logger.debug("Qdrant returned %d results", len(results))
 
                 # gather text from DB for summarization
                 from ..models import ContentChunk
@@ -41,14 +44,17 @@ class SearchService:
                     chunk = ContentChunk.query.filter_by(file_id=file_id, chunk_index=chunk_idx).first()
                     if chunk and chunk.content_text:
                         texts.append(chunk.content_text)
+                        logger.debug("Found chunk for summarization: %s", chunk.content_text)
                 if texts:
                     context = "\n".join(texts)
                     prompt = (
                         f"Using the following documents, answer the query: '{query}'.\n" + context
                     )
+                    logger.debug("Prompt for summarization: %s", prompt)
                     summary = self.ollama.summarize_text(prompt)
+                    logger.debug("Summary generated: %s", summary)
         except Exception as exc:  # pylint: disable=broad-except
-            logger.error("Search failed: %s", exc)
+            logger.exception("Search failed")
         db.session.add(SearchLog(query=query, results_count=len(results)))
         db.session.commit()
         return {"results": results, "summary": summary}

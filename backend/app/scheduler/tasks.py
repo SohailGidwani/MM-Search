@@ -12,11 +12,13 @@ def schedule_processing(file_id: int) -> None:
     """Schedule file processing job."""
     job_id = f"process_file_{file_id}"
     app = current_app._get_current_object()
+    logger.debug("Scheduling processing job %s", job_id)
     scheduler.add_job(id=job_id, func=process_file_job, trigger='date', args=[file_id, app])
 
 
 def process_file_job(file_id: int, app: Flask) -> None:
     """Process file job."""
+    logger.info("Running processing job for file %s", file_id)
     with app.app_context():
         service = ProcessingService()
         service.process(file_id)

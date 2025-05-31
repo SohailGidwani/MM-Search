@@ -15,8 +15,9 @@ This project is a simplified Flask backend for a multi-modal search engine. It p
    ```bash
    python run.py
    ```
-
 This will start the Flask development server and create database tables automatically.
+
+Logs are written to the file specified by the `LOG_FILE` environment variable (default `app.log`).
 
 ## Sample cURL Requests
 

@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @upload_bp.route('/file', methods=['POST'])
 def upload_file():
     """Upload a single file."""
+    logger.info("/upload/file called")
     if 'file' not in request.files:
         return jsonify({'error': 'No file provided'}), 400
     file = request.files['file']
@@ -37,10 +38,12 @@ def upload_file():
     )
     db.session.add(file_record)
     db.session.commit()
+    logger.debug("Stored file record with id %s", file_record.id)
 
     # schedule processing
     from ..scheduler.tasks import schedule_processing
     schedule_processing(file_record.id)
+    logger.debug("Scheduled processing for file %s", file_record.id)
 
     return jsonify({'file_id': file_record.id}), 201
 
@@ -48,6 +51,7 @@ def upload_file():
 @upload_bp.route('/batch', methods=['POST'])
 def upload_batch():
     """Upload multiple files."""
+    logger.info("/upload/batch called")
     files = request.files.getlist('files')
     ids = []
     for file in files:
@@ -69,11 +73,13 @@ def upload_batch():
         from ..scheduler.tasks import schedule_processing
         schedule_processing(record.id)
         ids.append(record.id)
+        logger.debug("Uploaded file %s id=%s", filename, record.id)
     return jsonify({'file_ids': ids}), 201
 
 
 @upload_bp.route('/status/<int:file_id>', methods=['GET'])
 def upload_status(file_id: int):
     """Return processing status."""
+    logger.info("/upload/status/%s called", file_id)
     file_record = File.query.get_or_404(file_id)
     return jsonify({'status': file_record.processing_status})
