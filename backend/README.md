@@ -17,3 +17,15 @@ This project is a simplified Flask backend for a multi-modal search engine. It p
    ```
 
 This will start the Flask development server and create database tables automatically.
+
+## Sample cURL Requests
+
+An example script with `curl` commands for every API endpoint is provided in
+`api_examples.sh`. Set `BASE_URL` to the address of the running Flask server and
+execute the script to test the API:
+
+```bash
+bash api_examples.sh
+```
+
+Edit the file paths or IDs in the script as needed for your environment.

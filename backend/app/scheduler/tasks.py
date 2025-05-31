@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 def schedule_processing(file_id: int) -> None:
     """Schedule file processing job."""
-    scheduler.add_job(func=process_file_job, trigger='date', args=[file_id])
+    job_id = f"process_file_{file_id}"
+    scheduler.add_job(id=job_id, func=process_file_job, trigger='date', args=[file_id])
 
 
 def process_file_job(file_id: int) -> None:
