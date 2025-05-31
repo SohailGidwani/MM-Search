@@ -18,12 +18,24 @@ class OllamaClient:
         url = f"{self.base_url}/api/embed"
         logger.debug("Requesting embedding for text: %s", text)
         try:
-            resp = requests.post(url, json={"model": "nomic-embed-text", "prompt": text})
+            resp = requests.post(
+                url,
+                json={"model": "nomic-embed-text", "input": text},
+            )
             resp.raise_for_status()
-            embedding = resp.json().get('embedding', [])
+            data = resp.json()
+            # Ollama's embed endpoint may return either an "embedding" field
+            # or an "embeddings" list when multiple inputs are provided.
+            embedding = data.get("embedding")
+            if embedding is None:
+                embeddings = data.get("embeddings", [])
+                if embeddings:
+                    embedding = embeddings[0]
+                else:
+                    embedding = []
             logger.debug("Received embedding of length %d", len(embedding))
             return embedding
-        except requests.RequestException as exc:
+        except requests.RequestException:
             logger.exception("Ollama embedding failed")
             return []
 
