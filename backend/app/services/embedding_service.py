@@ -3,6 +3,8 @@ import logging
 from typing import List
 
 from qdrant_client import QdrantClient
+from qdrant_client.http.models import PointStruct
+from uuid import uuid4
 from flask import current_app
 
 from .ollama_client import OllamaClient
@@ -28,14 +30,14 @@ class EmbeddingService:
         try:
             collection = 'text_embeddings'
             logger.debug("Uploading embedding to Qdrant with metadata: %s", metadata)
-            response = self.qdrant.upload_collection(
+
+            point_id = str(uuid4())
+            self.qdrant.upsert(
                 collection_name=collection,
-                vectors=[vector],
-                payload=[metadata],
+                points=[PointStruct(id=point_id, vector=vector, payload=metadata)],
             )
-            vector_id = response[0]
-            logger.debug("Uploaded vector id: %s", vector_id)
-            return vector_id
+            logger.debug("Uploaded vector id: %s", point_id)
+            return point_id
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception("Embedding upload failed")
             return ''

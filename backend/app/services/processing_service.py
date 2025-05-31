@@ -40,6 +40,7 @@ class ProcessingService:
                     'chunk_id': idx,
                     'content_type': chunk['type'],
                     'filename': file_record.filename,
+                    'content': chunk['content'],
                 }
                 vector_id = self.embedding.embed_text(chunk['content'], metadata)
                 logger.debug("Vector id returned: %s", vector_id)
@@ -50,6 +51,7 @@ class ProcessingService:
                     chunk_type=chunk['type'],
                     content_text=chunk['content'],
                     chunk_index=idx,
+                    related_metadata=metadata,
                     vector_id=vector_id,
                     embedding_model='nomic-embed-text',
                 ))
