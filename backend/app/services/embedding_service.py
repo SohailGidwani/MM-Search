@@ -58,3 +58,36 @@ class EmbeddingService:
         except Exception as exc:  # pylint: disable=broad-except
             logger.exception("Embedding upload failed")
             return ''
+
+    def update_point(self, point_id: str, vector: list | None = None, payload: dict | None = None) -> bool:
+        """Update an existing embedding point."""
+        logger.debug("Updating point %s", point_id)
+        try:
+            if vector is not None:
+                self.qdrant.update_vectors(
+                    collection_name=self.collection,
+                    points=[models.PointVectors(id=point_id, vector=vector)],
+                )
+            if payload is not None:
+                self.qdrant.set_payload(
+                    collection_name=self.collection,
+                    payload=payload,
+                    points=[point_id],
+                )
+            return True
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Point update failed")
+            return False
+
+    def delete_point(self, point_id: str) -> bool:
+        """Delete an embedding point from Qdrant."""
+        logger.debug("Deleting point %s", point_id)
+        try:
+            self.qdrant.delete(
+                collection_name=self.collection,
+                points_selector=models.PointIdsList(points=[point_id]),
+            )
+            return True
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Point deletion failed")
+            return False
