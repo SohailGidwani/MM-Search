@@ -18,6 +18,7 @@ class SearchService:
         self.qdrant = QdrantClient(url=current_app.config['QDRANT_URL'])
         from .ollama_client import OllamaClient
         self.ollama = OllamaClient()
+        self.threshold = 0.80
 
     def search(self, query: str, limit: int = 5) -> Dict[str, object]:
         """Perform semantic search and summarize results."""
@@ -30,10 +31,17 @@ class SearchService:
             logger.debug("Query embedding length: %d", len(vector))
             if vector:
                 search_result = self.qdrant.search(
-                    collection_name='text_embeddings', query_vector=vector, limit=limit
+                    collection_name='text_embeddings',
+                    query_vector=vector,
+                    limit=limit,
                 )
-                results = [hit.payload for hit in search_result]
-                logger.debug("Qdrant returned %d results", len(results))
+                filtered = [hit for hit in search_result if hit.score >= self.threshold]
+                results = [hit.payload for hit in filtered]
+                logger.debug(
+                    "Qdrant returned %d results, %d after threshold",
+                    len(search_result),
+                    len(results),
+                )
 
                 texts = [p.get('content') for p in results if p.get('content')]
 
