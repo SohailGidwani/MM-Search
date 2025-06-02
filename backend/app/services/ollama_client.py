@@ -56,14 +56,18 @@ class OllamaClient:
 
     def summarize_text(self, text: str) -> str:
         """Summarize text using llama3.2:3b model."""
-        url = f"{self.base_url}/generate"
-        payload = {"model": "llama3.2:3b", "prompt": text}
+        url = f"{self.base_url}/api/generate"
+        payload = {
+            "model": "llama3.2:3b",
+            "prompt": text,
+            "stream": False
+        }
         logger.debug("Requesting summary with prompt: %s", text)
         try:
             resp = requests.post(url, json=payload)
             resp.raise_for_status()
             data = resp.json()
-            summary = data.get("response") or data.get("summary", "")
+            summary = data.get("response", "")
             logger.debug("Received summary: %s", summary)
             return summary
         except requests.RequestException as exc:
