@@ -18,7 +18,7 @@ class SearchService:
         self.qdrant = QdrantClient(url=current_app.config['QDRANT_URL'])
         from .ollama_client import OllamaClient
         self.ollama = OllamaClient()
-        self.threshold = 0.80
+        self.threshold = 0.40
 
     def search(self, query: str, limit: int = 5) -> Dict[str, object]:
         """Perform semantic search and summarize results."""
